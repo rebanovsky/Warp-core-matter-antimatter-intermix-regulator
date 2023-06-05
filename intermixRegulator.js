@@ -11,6 +11,7 @@ const statusEndpoint = config.apiEndpoints.status; // For getting the status of 
 const adjustMatterEndpoint = config.apiEndpoints.adjustMatter; // For adding matter as substance to the engine (POST). Max value 0.2
 const adjustAntiMatterEndpoint = config.apiEndpoints.adjustAntiMatter; // For adding antimatter to the engine (POST). Max value 0.2
 
+// Function to fetch Authorization
 async function fetchData() {
   try {
     const response = await axios({
@@ -25,10 +26,11 @@ async function fetchData() {
     const authorizationCode = response.data.authorizationCode;
     return authorizationCode;
   } catch (error) {
-    // console.error(error);
+    console.error(error);
   }
 }
 
+// Function to adjust matter
 async function adjustMatter(authorizationCode, value) {
   try {
     const response = await axios({
@@ -41,10 +43,11 @@ async function adjustMatter(authorizationCode, value) {
     });
     return response;
   } catch (error) {
-    // console.error(error);
+    console.error(error);
   }
 }
 
+// Function to adjust antimatter
 async function adjustAntiMatter(authorizationCode, value) {
   try {
     const response = await axios({
@@ -57,10 +60,11 @@ async function adjustAntiMatter(authorizationCode, value) {
     });
     return response;
   } catch (error) {
-    // console.error(error);
+    console.error(error);
   }
 }
 
+// Function to display status of engine
 async function fetchStatus(authorizationCode) {
   try {
     const response = await axios({
@@ -74,19 +78,19 @@ async function fetchStatus(authorizationCode) {
     let adjustmentValue;
     if (flowRate === "OPTIMAL") {
       if (intermix < 0.5) {
-        adjustmentValue = Math.min(0.2, 0.5 - intermix);
+        adjustmentValue = Math.min(0.2, 0.5 - intermix); // If things are optimal, I don't want to increase matter for the maximum value of 0.2 because it can be too much and flowRate would go unnecessarily 'HIGH'
         await adjustMatter(authorizationCode, adjustmentValue);
       } else if (intermix > 0.5) {
-        adjustmentValue = Math.min(0.2, intermix - 0.5);
+        adjustmentValue = Math.min(0.2, intermix - 0.5); // If things are optimal, I don't want to increase antimatter for the maximum value of 0.2 because it can be too much and flowRate would go unnecessarily 'LOW'
         await adjustAntiMatter(authorizationCode, adjustmentValue);
       }
     } else if (flowRate === "LOW") {
       if (intermix < 0.5) {
         adjustmentValue = 0.2;
-        await adjustMatter(authorizationCode, adjustmentValue);
+        await adjustMatter(authorizationCode, adjustmentValue); // If more antimatter, increase matter
       } else if (intermix > 0.5) {
         adjustmentValue = 0.2;
-        await adjustAntiMatter(authorizationCode, adjustmentValue);
+        await adjustAntiMatter(authorizationCode, adjustmentValue); // If more matter, increase antimatter
       } else {
         adjustmentValue = 0.1;
         await adjustMatter(authorizationCode, adjustmentValue);
@@ -95,10 +99,10 @@ async function fetchStatus(authorizationCode) {
     } else if (flowRate === "HIGH") {
       if (intermix < 0.5) {
         adjustmentValue = -0.2;
-        await adjustAntiMatter(authorizationCode, adjustmentValue); // If matter is more, add antimatter
+        await adjustAntiMatter(authorizationCode, adjustmentValue); // If more matter, decrease antimatter
       } else if (intermix > 0.5) {
         adjustmentValue = -0.2;
-        await adjustMatter(authorizationCode, adjustmentValue); // If antimatter is more, add matter
+        await adjustMatter(authorizationCode, adjustmentValue); // If more antimatter, decrease matter
       } else {
         adjustmentValue = -0.1;
         await adjustMatter(authorizationCode, adjustmentValue);
@@ -106,21 +110,19 @@ async function fetchStatus(authorizationCode) {
       }
     }
   } catch (error) {
-    // console.error(error);
+    console.error(error);
   }
 }
 
-// Call the function and await its completion
+// Calling the function and awaiting its completion (running for 1min with one second intervals)
 (async () => {
   const authorizationCode = await fetchData();
   console.log(authorizationCode);
 
-  // Create an interval to fetch status every second for one minute
   const intervalId = setInterval(async () => {
     await fetchStatus(authorizationCode);
   }, 1000);
 
-  // Clear interval after one minute
   setTimeout(() => {
     clearInterval(intervalId);
   }, 60 * 1000);
