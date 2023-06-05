@@ -81,7 +81,7 @@ async function fetchStatus(authorizationCode) {
         adjustmentValue = Math.min(0.2, 0.5 - intermix); // If things are optimal, I don't want to increase matter for the maximum value of 0.2 because it can be too much and flowRate would go unnecessarily 'HIGH'
         await adjustMatter(authorizationCode, adjustmentValue);
       } else if (intermix > 0.5) {
-        adjustmentValue = Math.min(0.2, intermix - 0.5); // If things are optimal, I don't want to increase antimatter for the maximum value of 0.2 because it can be too much and flowRate would go unnecessarily 'LOW'
+        adjustmentValue = Math.min(0.2, intermix - 0.5); // Same as for adjustMatter
         await adjustAntiMatter(authorizationCode, adjustmentValue);
       }
     } else if (flowRate === "LOW") {
