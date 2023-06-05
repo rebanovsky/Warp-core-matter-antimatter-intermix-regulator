@@ -1,0 +1,21 @@
+{
+  "baseUrl": "https://warp-regulator-bd7q33crqa-lz.a.run.app",
+  "apiEndpoints": {
+    "start": {
+      "method": "POST",
+      "path": "/api/start"
+    },
+    "status": {
+      "method": "GET",
+      "path": "/api/status"
+    },
+    "adjustMatter": {
+      "method": "POST",
+      "path": "/api/adjust/matter"
+    },
+    "adjustAntiMatter": {
+      "method": "POST",
+      "path": "/api/adjust/antimatter"
+    }
+  }
+}
